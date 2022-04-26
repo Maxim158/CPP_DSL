@@ -5,7 +5,6 @@
 
 #include "Parser.h"
 
-
 // ***  LANGUAGE  ***
 //
 //    VAR ->[A - Za - z_] + [0 - 9] *
@@ -24,19 +23,19 @@
 //    DO -> 'do'
 //    IF -> 'if'
 //
-//    lang->expr +
-//    expr->assign | while_do | do_while | if | print
+//    lang-> expr +
+//    expr-> assign | while_do | do_while | if | print
 //    assign = VAR ASSIGN_OP expr_value SEMICOLON
-//    expr_value->value(OP value)*
+//    expr_value-> value(OP value)*
 //    value -> (VAR | DIGIT) | infinity
-//    infinity->LB expr_value RB
-//    condition->LC condition_expr((OR | AND) condition_expr)* RB
-//    condition_expr->expr_value COMPARE expr_value
-//    body->LCB expr + RCB
-//    while_do->WHILE condition DO body
-//    do_while->DO body WHILE condition
-//    if->IF condition body(ELSE body) ?
-//    print->PRINT infinity SEMICOLON
+//    infinity-> LB expr_value RB
+//    condition-> LC condition_expr((OR | AND) condition_expr)* RB
+//    condition_expr-> expr_value COMPARE expr_value
+//    body-> LCB expr + RCB
+//    while_do-> WHILE condition DO body
+//    do_while-> DO body WHILE condition
+//    if-> IF condition body(ELSE body) ?
+//    print-> PRINT infinity SEMICOLON
 
 
 struct ParseException : public std::exception
@@ -102,7 +101,7 @@ void Parser::fail_parse() {
     throw ParseException("failed to parse expression");
 }
 
-void Parser::assign() {
+ void Parser::assign() {
     VAR_CREATE();
     VAR();
     ASSIGN_OP();

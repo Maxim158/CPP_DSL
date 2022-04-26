@@ -1,8 +1,12 @@
 #pragma once
+#include <variant>
+
 #include "lexer.h"
+#include "AST.h"
 
 class Parser {
 private:
+
     std::vector<Lexem> list;
     std::vector<Lexem>::iterator CurrentToken;
     std::vector<Lexem>::iterator EndToken;
@@ -12,6 +16,7 @@ public:
     void parse(std::vector<Lexem> list);
 
 private:
+
     void expr();
     void assign();
     void expr_value();

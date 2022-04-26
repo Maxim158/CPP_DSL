@@ -2,7 +2,6 @@
 
 #include "Tokens.h"
 
-
 struct Lexem
 {
     TokenType Type;
@@ -14,5 +13,13 @@ struct Lexem
     void debug_print();
 };
 
+class Lexer {
+private:
 
-std::vector<Lexem> tokenizer(std::string const program);
+    std::vector<Lexem> list_of_lexems;
+
+public:
+
+    void tokenize(std::string const program);
+    std::vector<Lexem> get_list();
+};

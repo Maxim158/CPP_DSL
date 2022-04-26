@@ -56,16 +56,17 @@ Lexem get_lexem(std::string const part, std::size_t& index)
     return Lexem(TokenType::Unidentified, data);
 }
 
-std::vector<Lexem> tokenizer(std::string const program) {
+void Lexer::tokenize(std::string const program) {
     std::string word = "";
-    std::vector<Lexem> list_of_lexems;
     std::size_t index = 0;
     while (index < program.size()) {
         Lexem l = get_lexem(program, index);
         if (l.Type == TokenType::Whitespace) continue;
         list_of_lexems.push_back(l);
     }
-    
+}
+
+std::vector<Lexem> Lexer::get_list() {
     return list_of_lexems;
 }
 
