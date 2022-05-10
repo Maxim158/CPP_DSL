@@ -8,7 +8,7 @@
 #include "lexer.h"
 
 
-Lexem get_lexem(std::string const part, std::size_t& index)
+Lexem get_lexem(std::string const& part, std::size_t& index)
 {
     std::smatch match;
     if (std::regex_search(part.cbegin() + index, part.cend(), match, keywords, std::regex_constants::match_continuous))

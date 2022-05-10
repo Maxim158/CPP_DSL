@@ -4,7 +4,7 @@
 #include<iostream>
 
 #include "Parser.h"
-
+#include "AST.h"
 // ***  LANGUAGE  ***
 //
 //    VAR ->[A - Za - z_] + [0 - 9] *
@@ -56,23 +56,23 @@ struct ParseException : public std::exception
 void Parser::parse(std::vector<Lexem> list_lex) {
     CurrentToken = list_lex.begin();
     EndToken = list_lex.end();
-
-    std::cout << "List size: " << list_lex.size() << std::endl;
+    
+    //std::cout << "List size: " << list_lex.size() << std::endl;
 
     try
     {
         while (CurrentToken != EndToken) {
-            std::cout << "CYCLE!" << std::endl;
-            expr();
+            //std::cout << "CYCLE!" << std::endl;
+            program.body.push_back(expr());
         }
     }
     catch (ParseException&) {}
-    std::cout << "DONE!" << std::endl;
-    std::cout << (CurrentToken == EndToken ? "  SUCCESS!" : "FAILURE!") << std::endl;
+    //std::cout << "DONE!" << std::endl;
+    //std::cout << (CurrentToken == EndToken ? "  SUCCESS!" : "FAILURE!") << std::endl;
 }
 
-void Parser::expr() {
-    using parse_ft = std::pair<char const*, void(Parser::*)(void)>;
+AST_expr Parser::expr() {
+    using parse_ft = std::pair<char const*, AST_expr_t(Parser::*)(void)>;
     std::vector<parse_ft> const parsers {
         {"assign", &Parser::assign},
         {"while_do", &Parser::while_do},
@@ -82,117 +82,142 @@ void Parser::expr() {
         {"fail", &Parser::fail_parse}
     };
 
-    std::cout << "trying expr()" << std::endl;
+    //std::cout << "trying expr()" << std::endl;
+    AST_expr ex;
 
     for (parse_ft p : parsers)
     {
-        std::cout << "trying " << p.first << '\n';
-        try { (this->*p.second)(); std::cout << "matched " << p.first << '\n'; break; }
+        //std::cout << "trying " << p.first << '\n';
+        try {  ex.body.push_back((this->*p.second)()); /*std::cout << "matched " << p.first << '\n';*/ break; }
         catch (ParseException& e)
         {
-            std::cerr << e.what() << std::endl;
+            //std::cerr << e.what() << std::endl;
             if (e.why == "failed to parse expression")
                 throw;
         }
     }
+
+    return ex;
 }
 
-void Parser::fail_parse() {
+AST_expr_t Parser::fail_parse() {
+    AST_fail fail;
     throw ParseException("failed to parse expression");
+    return fail;
 }
 
- void Parser::assign() {
+AST_expr_t Parser::assign() {
+    AST_assign as{};
     VAR_CREATE();
-    VAR();
+    as.target = VAR();
     ASSIGN_OP();
-    expr_value();
+    as.expression = expr_value();
     SEMICOLON();
+    return as;
 }
 
-void Parser::expr_value() {
-     value();
-     try { while (true) { OP(); value(); } }
+AST_expr_val Parser::expr_value() {
+    AST_expr_val ex_val;
+     ex_val.values.push_back(value());
+     try { while (true) { ex_val.operators.push_back(OP()); ex_val.values.push_back(value()); } }
      catch(ParseException&) {}
+     return ex_val;
 }
 
-void Parser::value() {
+std::variant<AST_var, AST_val, AST_infinity> Parser::value() {
     try { return VAR(); } catch (ParseException&) {}
     try { return DIGIT(); } catch (ParseException&) {}
     return infinity();
 }
 
-void Parser::infinity() {
+AST_infinity Parser::infinity() {
+    AST_infinity inf;
     LB();
-    expr_value();
+    inf.expression = expr_value();
     RB();
+    return inf;
 }
 
-void Parser::condition() {                  
+AST_condition Parser::condition() {
+    AST_condition cond;
     LB();
-    condition_expr();
+    cond.values.push_back(condition_expr());
     try {
         while (true) {
             try {
                 OR();
-                condition_expr();
+                cond.values.push_back(condition_expr());
             continue;
             }
             catch (ParseException&) {}
             AND();
-            condition_expr();
+            cond.values.push_back(condition_expr());
         }
     }
     catch (ParseException&) {}
     RB();
+    return cond;
 }
 
-void Parser::condition_expr() {
-    expr_value();
-    COMPARE();
-    expr_value();
+AST_condition_expr Parser::condition_expr() {
+    AST_condition_expr cond_exp;
+    cond_exp.values.push_back(expr_value());
+    cond_exp.compare = COMPARE();
+    cond_exp.values.push_back(expr_value());
+    return cond_exp;
 }
 
-void Parser::body() {           
+AST_body Parser::body() {
+    AST_body bd;
     LCB();
-    expr();
+    bd.body.push_back(expr());
     try {
         while (true) {
-            expr();
+            bd.body.push_back(expr());
         }
     }
     catch (ParseException&) {}
     RCB();
+    return bd;
 }
 
-void Parser::while_do() {
+AST_expr_t Parser::while_do() {
+    AST_while_do wd;
     WHILE();
-    condition();
+    wd.condition = condition();
     DO();
-    body();
+    wd.body = body();
+    return wd;
 }
 
-void Parser::do_while() {
+AST_expr_t Parser::do_while() {
+    AST_do_while dw;
     DO();
-    body();
+    dw.body = body();
     WHILE();
-    condition();
+    dw.condition = condition();
+    return dw;
 }
 
-void Parser::if_() {
+AST_expr_t Parser::if_() {
+    AST_if iff;
     IF();
-    condition();
-    body();
+    iff.condition = condition();
+    iff.body_if = body();
     try {
         ELSE();
-        body();
+        iff.body_else = body();
     }
     catch (ParseException&) {}
+    return iff;
 }
 
-void Parser::print_() {
+AST_expr_t Parser::print_() {
+    AST_print pr;
     PRINT();
-    infinity();
+    pr.expression = infinity();
     SEMICOLON();
+    return pr;
 }
 
 
@@ -203,16 +228,24 @@ void Parser::VAR_CREATE() {
     ++CurrentToken;
 }
 
-void Parser::VAR() {
+AST_var Parser::VAR() {
+    AST_var vr;
     if (CurrentToken == EndToken) throw ParseException("Unexpected end of file");
     if (CurrentToken->Type != TokenType::Identifier) throw ParseException(std::string("Expected VAR but got ") + type_to_string(CurrentToken->Type));
+    vr.name = CurrentToken->contains;
     ++CurrentToken;
+    return vr;
 }
 
-void Parser::DIGIT() {
+AST_val Parser::DIGIT() {
+    AST_val val;
     if (CurrentToken == EndToken) throw ParseException("Unexpected end of file");
     if (CurrentToken->Type != TokenType::Literal) throw ParseException(std::string("Expected DIGIT but got ") + type_to_string(CurrentToken->Type));
+    if (CurrentToken->contains[0] != '\'')
+        val.value = strtod(CurrentToken->contains.c_str(), nullptr);
+    else val.value = CurrentToken->contains.substr(1, CurrentToken->contains.size() - 2);
     ++CurrentToken;
+    return val;
 }
 
 void Parser::ASSIGN_OP() {
@@ -221,16 +254,16 @@ void Parser::ASSIGN_OP() {
     ++CurrentToken;
 }
 
-void Parser::OP() {
+std::string Parser::OP() {
     if (CurrentToken == EndToken) throw ParseException("Unexpected end of file");
     if (CurrentToken->Type != TokenType::Operator) throw ParseException(std::string("Expected OPERATOR but got ") + type_to_string(CurrentToken->Type));
-    ++CurrentToken;
+    return CurrentToken++->contains;
 }
 
-void Parser::COMPARE() {
+std::string Parser::COMPARE() {
     if (CurrentToken == EndToken) throw ParseException("Unexpected end of file");
     if (CurrentToken->Type != TokenType::Compare) throw ParseException(std::string("Expected COMPARE but got ") + type_to_string(CurrentToken->Type));
-    ++CurrentToken;
+    return CurrentToken++->contains;
 }
 
 void Parser::LB() {

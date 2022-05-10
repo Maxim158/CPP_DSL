@@ -152,7 +152,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AST.h" />
-    <ClInclude Include="Interpreter.h" />
     <ClInclude Include="lexer.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="stdafx.h" />
@@ -160,7 +159,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AST.cpp" />
-    <ClCompile Include="Interpreter.cpp" />
     <ClCompile Include="Language.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="Parser.cpp" />

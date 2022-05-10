@@ -12,30 +12,33 @@ private:
     std::vector<Lexem>::iterator EndToken;
 
 public:
+   AST_body program;
+
+public:
 
     void parse(std::vector<Lexem> list);
 
 private:
 
-    void expr();
-    void assign();
-    void expr_value();
-    void value();
-    void infinity();
-    void condition();
-    void condition_expr();
-    void body();
-    void while_do();
-    void do_while();
-    void if_();
-    void print_();
+    AST_expr expr();
+    AST_expr_t assign();
+    AST_expr_val expr_value();
+    std::variant<AST_var, AST_val, AST_infinity> value();
+    AST_infinity infinity();
+    AST_condition condition();
+    AST_condition_expr condition_expr();
+    AST_body body();
+    AST_expr_t while_do();
+    AST_expr_t do_while();
+    AST_expr_t if_();
+    AST_expr_t print_();
 
     void VAR_CREATE();
-    void VAR();
-    void DIGIT();
+    AST_var VAR();
+    AST_val DIGIT();
     void ASSIGN_OP();
-    void OP();
-    void COMPARE();
+    std::string OP();
+    std::string COMPARE();
     void LB();
     void RB();
     void LCB();
@@ -49,6 +52,6 @@ private:
     void ELSE();
     void PRINT();
 
-    void fail_parse();
+    AST_expr_t fail_parse();
 
 };
