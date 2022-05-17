@@ -114,11 +114,18 @@ std::optional<AST_val> AST_body::execute(Context * ctx) const
 
 std::optional<AST_val> AST_while_do::execute(Context * ctx) const
 {
+    while (this->condition.execute) {
+        this->body.execute;
+    }
     return std::optional<AST_val>();
 }
 
 std::optional<AST_val> AST_do_while::execute(Context * ctx) const
 {
+    do {
+        this->body.execute;
+    } while (this->condition.execute);
+
     return std::optional<AST_val>();
 }
 
