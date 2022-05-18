@@ -118,15 +118,17 @@ AST_expr_t Parser::assign() {
 
 AST_expr_val Parser::expr_value() {
     AST_expr_val ex_val;
-     ex_val.values.push_back(value());
-     try { while (true) { ex_val.operators.push_back(OP()); ex_val.values.push_back(value()); } }
-     catch(ParseException&) {}
-     return ex_val;
+    ex_val.values.push_back(value());
+    try { while (true) { ex_val.operators.push_back(OP()); ex_val.values.push_back(value()); } }
+    catch(ParseException&) {}
+    return ex_val;
 }
 
-std::variant<AST_var, AST_val, AST_infinity> Parser::value() {
+std::variant<AST_var, AST_val, AST_infinity, AST_call> Parser::value() {
     try { return VAR(); } catch (ParseException&) {}
     try { return DIGIT(); } catch (ParseException&) {}
+    try { return LIST(); } catch (ParseException&) {}
+    try { return CALL(); } catch (ParseException&) {}
     return infinity();
 }
 
@@ -246,6 +248,31 @@ AST_val Parser::DIGIT() {
     else val.value = CurrentToken->contains.substr(1, CurrentToken->contains.size() - 2);
     ++CurrentToken;
     return val;
+}
+
+AST_call Parser::CALL() {
+    AST_call cl;
+    if (CurrentToken == EndToken) throw ParseException("Unexpected end of file");
+    if (CurrentToken->Type != TokenType::Delim || CurrentToken->contains != "@") throw ParseException(std::string("Expected @ but got ") + type_to_string(CurrentToken->Type));
+    return cl;
+}
+
+AST_val Parser::LIST() {
+    AST_val lst;
+    lst.value = LinkedList();
+    if (CurrentToken->Type != TokenType::Delim || CurrentToken->contains != "[") throw ParseException("expected list opening bracket");
+    ++CurrentToken;
+
+    while (CurrentToken->Type != TokenType::Delim || CurrentToken->contains != "]")
+    {
+        auto& l = std::get<std::shared_ptr<LinkedList const>>(lst.value);
+        l->append(l, expr_value());
+        if (CurrentToken->Type == TokenType::Delim && CurrentToken->contains == ",") ++CurrentToken;
+    }
+
+    if (CurrentToken->Type != TokenType::Delim || CurrentToken->contains != "]") throw ParseException("expected list opening bracket");
+    ++CurrentToken;
+    return lst;
 }
 
 void Parser::ASSIGN_OP() {

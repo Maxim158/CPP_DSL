@@ -148,3 +148,18 @@ std::optional<AST_val> AST_print::execute(Context * ctx) const
     std::cout << std::endl;
     return std::nullopt;
 }
+
+std::shared_ptr<LinkedList> LinkedList::append(std::shared_ptr<LinkedList> self, AST_val val) const
+{
+    return std::make_shared<LinkedList>(val, self);
+}
+
+std::optional<AST_val const> LinkedList::head() const
+{
+    return value;
+}
+
+std::shared_ptr<LinkedList const> const & LinkedList::tail() const
+{
+    return next;
+}

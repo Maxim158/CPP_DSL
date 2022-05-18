@@ -19,7 +19,7 @@ static const std::regex keywords("(var|for|while|print|if|else|or|and|do)\\b");
 static const std::regex operators("\\+|\\-|\\*|\\/");
 static const std::regex compare("==|<>|>|<");
 static const std::regex assign("=");
-static const std::regex delims("\\(|\\)|\\{|\\}|;");
+static const std::regex delims("\\(|\\)|\\{|\\}|\\[|\\]|\\,|;|\\@");
 static const std::regex identifier("[a-zA-Z]+[a-zA-Z0_]*[0-9]*");
 static const std::regex literal("[1-9]+[0-9]*|'(.*)'");
 static const std::regex whitespace("\\s");

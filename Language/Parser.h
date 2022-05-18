@@ -23,7 +23,7 @@ private:
     AST_expr expr();
     AST_expr_t assign();
     AST_expr_val expr_value();
-    std::variant<AST_var, AST_val, AST_infinity> value();
+    std::variant<AST_var, AST_val, AST_infinity, AST_call> value();
     AST_infinity infinity();
     AST_condition condition();
     AST_condition_expr condition_expr();
@@ -36,6 +36,8 @@ private:
     void VAR_CREATE();
     AST_var VAR();
     AST_val DIGIT();
+    AST_call CALL();
+    AST_val LIST();
     void ASSIGN_OP();
     std::string OP();
     std::string COMPARE();

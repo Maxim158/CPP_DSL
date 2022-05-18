@@ -43,8 +43,21 @@ struct AST_var : public AST
 
 struct AST_val : public AST
 {
-    std::variant<double, std::string> value;
+    std::variant<double, std::string, std::shared_ptr<struct LinkedList>> value;
     std::optional<AST_val> execute(struct Context* ctx) const override;
+};
+
+
+class LinkedList
+{
+private:
+    std::optional<AST_val const> const value;
+    std::shared_ptr<LinkedList const> const next;
+
+public:
+    std::shared_ptr<LinkedList> append(std::shared_ptr<LinkedList> self, AST_val val) const;
+    std::optional<AST_val const> head() const;
+    std::shared_ptr<LinkedList const> const & tail() const;
 };
 
 struct AST_expr_val : public AST
@@ -129,4 +142,9 @@ struct AST_print : public AST {
 };
 
 struct AST_fail : public AST {
+};
+
+struct AST_call : public AST {
+    std::string command;
+    std::optional<AST_val> execute(struct Context* ctx) const override;
 };

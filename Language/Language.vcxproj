@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AST.h" />
+    <ClInclude Include="Header.h" />
     <ClInclude Include="lexer.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="stdafx.h" />
