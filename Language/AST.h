@@ -6,10 +6,12 @@
 #include <map>
 
 
+#include "LinkedList.h"
+
 // ***  LANGUAGE  ***
 
 //    lang-> expr +
-//    expr-> assign | while_do | do_while | if | print
+//    expr-> assign | while_do | do_while | if | print | linked
 //    assign = VAR ASSIGN_OP expr_value SEMICOLON
 //    expr_value-> value(OP value)*
 //    value -> (VAR | DIGIT) | infinity
@@ -22,9 +24,11 @@
 //    if-> IF condition body(ELSE body) ?
 //    print-> PRINT infinity SEMICOLON
 
+// linked -> LINKED VAR SEMICOLON
+
 struct Context
 {
-    std::map<std::string, struct AST_val> variables;
+    std::map<std::string, struct AST_val, struct AST_ll> variables;
 
 public:
     struct AST_val get(std::string const& name) const;
@@ -41,24 +45,18 @@ struct AST_var : public AST
     std::optional<AST_val> execute(struct Context* ctx) const override;
 };
 
-struct AST_val : public AST
+struct AST_ll : public AST
 {
-    std::variant<double, std::string, std::shared_ptr<struct LinkedList>> value;
+    std::string name;
     std::optional<AST_val> execute(struct Context* ctx) const override;
 };
 
-
-class LinkedList
+struct AST_val : public AST
 {
-private:
-    std::optional<AST_val const> const value;
-    std::shared_ptr<LinkedList const> const next;
-
-public:
-    std::shared_ptr<LinkedList> append(std::shared_ptr<LinkedList> self, AST_val val) const;
-    std::optional<AST_val const> head() const;
-    std::shared_ptr<LinkedList const> const & tail() const;
+    std::variant<double, std::string> value;
+    std::optional<AST_val> execute(struct Context* ctx) const override;
 };
+
 
 struct AST_expr_val : public AST
 {
@@ -101,7 +99,7 @@ struct AST_if;
 struct AST_print;
 struct AST_fail;
 
-using AST_expr_t = std::variant<AST_assign, AST_while_do, AST_do_while, AST_if, AST_print, AST_fail>;
+using AST_expr_t = std::variant<AST_assign, AST_while_do, AST_do_while, AST_if, AST_print, AST_ll, AST_fail>;
 
 struct AST_expr : public AST
 {
@@ -144,7 +142,3 @@ struct AST_print : public AST {
 struct AST_fail : public AST {
 };
 
-struct AST_call : public AST {
-    std::string command;
-    std::optional<AST_val> execute(struct Context* ctx) const override;
-};

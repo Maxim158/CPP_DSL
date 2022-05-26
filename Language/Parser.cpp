@@ -67,8 +67,8 @@ void Parser::parse(std::vector<Lexem> list_lex) {
         }
     }
     catch (ParseException&) {}
-    //std::cout << "DONE!" << std::endl;
-    //std::cout << (CurrentToken == EndToken ? "  SUCCESS!" : "FAILURE!") << std::endl;
+    std::cout << "DONE!" << std::endl;
+    std::cout << (CurrentToken == EndToken ? "  SUCCESS!" : "FAILURE!") << std::endl;
 }
 
 AST_expr Parser::expr() {
@@ -79,7 +79,8 @@ AST_expr Parser::expr() {
         {"do_while", &Parser::do_while},
         {"if", &Parser::if_},
         {"print", &Parser::print_},
-        {"fail", &Parser::fail_parse}
+        {"fail", &Parser::fail_parse},
+        {"linked", &Parser::linked}
     };
 
     //std::cout << "trying expr()" << std::endl;
@@ -106,6 +107,16 @@ AST_expr_t Parser::fail_parse() {
     return fail;
 }
 
+
+AST_expr_t Parser::linked()
+{
+    AST_ll list{};
+    LINKED();
+    VAR();
+    SEMICOLON();
+    return list;
+}
+
 AST_expr_t Parser::assign() {
     AST_assign as{};
     VAR_CREATE();
@@ -124,11 +135,9 @@ AST_expr_val Parser::expr_value() {
     return ex_val;
 }
 
-std::variant<AST_var, AST_val, AST_infinity, AST_call> Parser::value() {
+std::variant<AST_var, AST_val, AST_infinity> Parser::value() {
     try { return VAR(); } catch (ParseException&) {}
     try { return DIGIT(); } catch (ParseException&) {}
-    try { return LIST(); } catch (ParseException&) {}
-    try { return CALL(); } catch (ParseException&) {}
     return infinity();
 }
 
@@ -250,31 +259,6 @@ AST_val Parser::DIGIT() {
     return val;
 }
 
-AST_call Parser::CALL() {
-    AST_call cl;
-    if (CurrentToken == EndToken) throw ParseException("Unexpected end of file");
-    if (CurrentToken->Type != TokenType::Delim || CurrentToken->contains != "@") throw ParseException(std::string("Expected @ but got ") + type_to_string(CurrentToken->Type));
-    return cl;
-}
-
-AST_val Parser::LIST() {
-    AST_val lst;
-    lst.value = LinkedList();
-    if (CurrentToken->Type != TokenType::Delim || CurrentToken->contains != "[") throw ParseException("expected list opening bracket");
-    ++CurrentToken;
-
-    while (CurrentToken->Type != TokenType::Delim || CurrentToken->contains != "]")
-    {
-        auto& l = std::get<std::shared_ptr<LinkedList const>>(lst.value);
-        l->append(l, expr_value());
-        if (CurrentToken->Type == TokenType::Delim && CurrentToken->contains == ",") ++CurrentToken;
-    }
-
-    if (CurrentToken->Type != TokenType::Delim || CurrentToken->contains != "]") throw ParseException("expected list opening bracket");
-    ++CurrentToken;
-    return lst;
-}
-
 void Parser::ASSIGN_OP() {
     if (CurrentToken == EndToken) throw ParseException("Unexpected end of file");
     if (CurrentToken->Type != TokenType::Assign) throw ParseException(std::string("Expected ASSIGN but got ") + type_to_string(CurrentToken->Type));
@@ -374,5 +358,12 @@ void Parser::PRINT() {
     if (CurrentToken == EndToken) throw ParseException("Unexpected end of file");
     if (CurrentToken->Type != TokenType::Keyword) throw ParseException(std::string("Expected KEYWORD but got ") + type_to_string(CurrentToken->Type));
     if (CurrentToken->contains != "print") throw ParseException(std::string("Expected PRINT but got ") + CurrentToken->contains);
+    ++CurrentToken;
+}
+
+void Parser::LINKED() {
+    if (CurrentToken == EndToken) throw ParseException("Unexpected end of file");
+    if (CurrentToken->Type != TokenType::Keyword) throw ParseException(std::string("Expected KEYWORD but got ") + type_to_string(CurrentToken->Type));
+    if (CurrentToken->contains != "linked") throw ParseException(std::string("Expected LINKED but got ") + CurrentToken->contains);
     ++CurrentToken;
 }

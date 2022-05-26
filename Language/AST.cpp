@@ -114,8 +114,8 @@ std::optional<AST_val> AST_body::execute(Context * ctx) const
 
 std::optional<AST_val> AST_while_do::execute(Context * ctx) const
 {
-    while (this->condition.execute) {
-        this->body.execute;
+    while (this->condition.execute(ctx)) {
+        this->body.execute(ctx);
     }
     return std::optional<AST_val>();
 }
@@ -123,8 +123,8 @@ std::optional<AST_val> AST_while_do::execute(Context * ctx) const
 std::optional<AST_val> AST_do_while::execute(Context * ctx) const
 {
     do {
-        this->body.execute;
-    } while (this->condition.execute);
+        this->body.execute(ctx);
+    } while (this->condition.execute(ctx));
 
     return std::optional<AST_val>();
 }
@@ -149,17 +149,3 @@ std::optional<AST_val> AST_print::execute(Context * ctx) const
     return std::nullopt;
 }
 
-std::shared_ptr<LinkedList> LinkedList::append(std::shared_ptr<LinkedList> self, AST_val val) const
-{
-    return std::make_shared<LinkedList>(val, self);
-}
-
-std::optional<AST_val const> LinkedList::head() const
-{
-    return value;
-}
-
-std::shared_ptr<LinkedList const> const & LinkedList::tail() const
-{
-    return next;
-}

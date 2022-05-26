@@ -23,7 +23,7 @@ private:
     AST_expr expr();
     AST_expr_t assign();
     AST_expr_val expr_value();
-    std::variant<AST_var, AST_val, AST_infinity, AST_call> value();
+    std::variant<AST_var, AST_val, AST_infinity> value();
     AST_infinity infinity();
     AST_condition condition();
     AST_condition_expr condition_expr();
@@ -32,12 +32,12 @@ private:
     AST_expr_t do_while();
     AST_expr_t if_();
     AST_expr_t print_();
+    AST_expr_t linked();
 
     void VAR_CREATE();
+    void LINKED();
     AST_var VAR();
     AST_val DIGIT();
-    AST_call CALL();
-    AST_val LIST();
     void ASSIGN_OP();
     std::string OP();
     std::string COMPARE();
