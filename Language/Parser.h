@@ -33,11 +33,16 @@ private:
     AST_expr_t if_();
     AST_expr_t print_();
     AST_expr_t linked();
+    AST_expr_t call();
 
     void VAR_CREATE();
     void LINKED();
+    void DOG();
+    int INTEGER();
+    std::string call_name();
     AST_var VAR();
     AST_val DIGIT();
+    AST_ll LIST();
     void ASSIGN_OP();
     std::string OP();
     std::string COMPARE();

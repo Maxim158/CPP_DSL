@@ -10,14 +10,30 @@ std::optional<AST_val> AST::execute(struct Context* ctx) const
     return std::nullopt;
 }
 
+Node* AST::execute_list(struct Context* ctx) const
+{
+    "Not implemented!";
+    return nullptr;
+}
+
 std::optional<AST_val> AST_var::execute(Context * ctx) const
 {
     return ctx->get(this->name);
 }
 
+Node* AST_ll::execute_list(Context* ctx) const
+{
+    return ctx->get_list(this->name_of_list);
+}
+
 AST_val Context::get(std::string const & name) const
 {
     return this->variables.at(name);
+}
+
+Node* Context::get_list(std::string const& name) const
+{
+    return this->link_list.at(name);
 }
 
 std::optional<AST_val> AST_val::execute(Context* ctx) const
@@ -125,7 +141,6 @@ std::optional<AST_val> AST_do_while::execute(Context * ctx) const
     do {
         this->body.execute(ctx);
     } while (this->condition.execute(ctx));
-
     return std::optional<AST_val>();
 }
 
@@ -149,3 +164,48 @@ std::optional<AST_val> AST_print::execute(Context * ctx) const
     return std::nullopt;
 }
 
+
+std::optional<AST_val> AST_linked::execute(Context* ctx) const
+{
+    ctx->link_list[this->list.name_of_list] = nullptr;
+    return std::nullopt;
+}
+
+std::optional<AST_val> AST_call::execute(Context* ctx) const
+{
+    std::map <std::string, int> mapping;
+    mapping["append"] = 0;
+    mapping["push"] = 1;
+    mapping["show"] = 2;
+    mapping["head"] = 3;
+    mapping["delete"] = 4; // first Node
+    mapping["remove"] = 5; // last Node
+
+
+    Node** OldNode = &ctx->link_list[this->list.name_of_list];
+    switch (mapping[this->command])
+    {
+    case 0:
+         append(OldNode, this->variable);
+         break;
+    case 1:
+        push(OldNode, this->variable);
+        break;
+    case 2:
+        displayList(*OldNode);
+        break;
+    case 3:
+        head(*OldNode);
+        break;
+    case 4:
+        deleteFirstNode(*OldNode);
+        break;
+    case 5:
+        removeLastNode(*OldNode);
+        break;
+    default:
+        break;
+    }
+
+    return std::nullopt;
+}

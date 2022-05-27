@@ -5,11 +5,13 @@
 struct Node
 {
     int data;
-    struct Node *next;
+    struct Node* next = nullptr;
+
+
 };
 
 //insert a new node in front of the list
-void push(struct Node** head, int node_data)
+inline void push(struct Node** head, int node_data)
 {
     /* 1. create and allocate node */
     struct Node* newNode = new Node;
@@ -18,14 +20,14 @@ void push(struct Node** head, int node_data)
     newNode->data = node_data;
 
     /* 3. set next of new node as head */
-    newNode->next = (*head);
+    newNode->next = *head;
 
     /* 4. move the head to point to the new node */
-    (*head) = newNode;
+    *head = newNode;
 }
 
 //insert new node after a given node
-void insertAfter(struct Node* prev_node, int node_data)
+inline void insertAfter(struct Node* prev_node, int node_data)
 {
     /*1. check if the given prev_node is NULL */
     if (prev_node == NULL)
@@ -47,12 +49,12 @@ void insertAfter(struct Node* prev_node, int node_data)
 }
 
 /* insert new node at the end of the linked list */
-void append(struct Node** head, int node_data)
+inline void append(struct Node** head, int node_data)
 {
     /* 1. create and allocate node */
     struct Node* newNode = new Node;
 
-    struct Node *last = *head; /* used in step 5*/
+    struct Node* last = *head; /* used in step 5*/
 
     /* 2. assign data to the node */
     newNode->data = node_data;
@@ -73,11 +75,10 @@ void append(struct Node** head, int node_data)
 
     /* 6. Change the next of last node */
     last->next = newNode;
-    return;
 }
 
 // display linked list contents
-void displayList(struct Node *node)
+inline void displayList(struct Node* node)
 {
     //traverse the list to display each node
     while (node != NULL)
@@ -87,17 +88,18 @@ void displayList(struct Node *node)
     }
 
     if (node == NULL)
-        std::cout << "null";
+        std::cout << "null\n";
 }
 
 // get first element of list
-int head(struct Node *node)
+inline int head(struct Node* node)
 {
+    if (NULL == node) return 0;
     return node->data;
 }
 
 // delete first node in the linked list
-Node* deleteFirstNode(struct Node* head)
+inline Node* deleteFirstNode(struct Node* head)
 {
     if (head == NULL)
         return NULL;
@@ -111,7 +113,7 @@ Node* deleteFirstNode(struct Node* head)
 }
 
 // delete last node from linked list
-Node* removeLastNode(struct Node* head)
+inline Node* removeLastNode(struct Node* head)
 {
     if (head == NULL)
         return NULL;
