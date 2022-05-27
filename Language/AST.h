@@ -5,12 +5,14 @@
 #include <optional>
 #include <map>
 
+#include "LinkedList.h"
+
 
 // ***  LANGUAGE  ***
 
 //    lang-> expr +
 //    expr-> assign | while_do | do_while | if | print
-//    assign = VAR ASSIGN_OP expr_value SEMICOLON
+//    assign = VAR_CREATE VAR ASSIGN_OP expr_value SEMICOLON
 //    expr_value-> value(OP value)*
 //    value -> (VAR | DIGIT) | infinity
 //    infinity-> LB expr_value RB
@@ -19,19 +21,26 @@
 //    body-> LCB expr + RCB
 //    while_do-> WHILE condition DO body
 //    do_while-> DO body WHILE condition
-//    if-> IF condition body(ELSE body) ?
+//    if-> IF condition body(ELSE body)
 //    print-> PRINT infinity SEMICOLON
+
+
+//   linked-> LINKED VAR SEMICOLON
+//   func-> FUNC LB VAR* RB
 
 struct Context
 {
     std::map<std::string, struct AST_val> variables;
-
+    std::map<std::string, Node*> link_list;
 public:
     struct AST_val get(std::string const& name) const;
+    Node* get_list(std::string const& name) const;
 };
 
 struct AST {
+   
     virtual std::optional<AST_val> execute(struct Context* ctx) const;
+    virtual Node* execute_list(struct Context* ctx) const;
 };
 
 
@@ -44,6 +53,18 @@ struct AST_var : public AST
 struct AST_val : public AST
 {
     std::variant<double, std::string> value;
+    std::optional<AST_val> execute(struct Context* ctx) const override;
+};
+
+struct AST_ll : public AST
+{
+    std::string name_of_list;
+    Node* execute_list(struct Context* ctx) const override;
+};
+
+struct AST_linked : public AST
+{
+    AST_ll list;
     std::optional<AST_val> execute(struct Context* ctx) const override;
 };
 
@@ -86,9 +107,10 @@ struct AST_while_do;
 struct AST_do_while;
 struct AST_if;
 struct AST_print;
+struct AST_call;
 struct AST_fail;
 
-using AST_expr_t = std::variant<AST_assign, AST_while_do, AST_do_while, AST_if, AST_print, AST_fail>;
+using AST_expr_t = std::variant < AST_assign, AST_while_do, AST_do_while, AST_if, AST_print, AST_fail, AST_linked, AST_call> ;
 
 struct AST_expr : public AST
 {
@@ -116,17 +138,28 @@ struct AST_do_while : public AST
     std::optional<AST_val> execute(struct Context* ctx) const override;
 };
 
-struct AST_if : public AST {
+struct AST_if : public AST 
+{
     AST_condition condition;
     AST_body body_if;
     AST_body body_else;
     std::optional<AST_val> execute(struct Context* ctx) const override;
 };
 
-struct AST_print : public AST {
+struct AST_print : public AST 
+{
     AST_infinity expression;
     std::optional<AST_val> execute(struct Context* ctx) const override;
 };
 
-struct AST_fail : public AST {
+struct AST_call : public AST
+{
+    AST_ll list;
+    std::string command;
+    int variable;
+    std::optional<AST_val> execute(struct Context* ctx) const override;
+};
+
+struct AST_fail : public AST 
+{
 };

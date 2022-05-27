@@ -15,8 +15,8 @@ enum class TokenType
     Unidentified
 };
 
-static const std::regex keywords("(var|for|while|print|if|else|or|and|do)\\b");
-static const std::regex operators("\\+|\\-|\\*|\\/");
+static const std::regex keywords("(var|for|while|print|linked|func|if|else|or|and|do|linked)\\b");
+static const std::regex operators("\\+|\\-|\\*|\\/|\\@");
 static const std::regex compare("==|<>|>|<");
 static const std::regex assign("=");
 static const std::regex delims("\\(|\\)|\\{|\\}|;");
